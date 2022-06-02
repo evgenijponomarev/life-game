@@ -5,6 +5,7 @@
   "private": true,
   "scripts": {
     "build": "webpack --config webpack.config.js",
+    "lint": "eslint ./src",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
@@ -18,6 +19,9 @@
   },
   "homepage": "https://github.com/evgenijponomarev/life-game#readme",
   "devDependencies": {
+    "@typescript-eslint/eslint-plugin": "^5.27.0",
+    "@typescript-eslint/parser": "^5.27.0",
+    "eslint": "^8.16.0",
     "ts-loader": "^9.3.0",
     "typescript": "^4.7.2",
     "webpack": "^5.72.1",

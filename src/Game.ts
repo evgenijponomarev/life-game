@@ -19,7 +19,7 @@ export class Game {
     width: number,
     height: number,
     Renderer: IRendererConstructor,
-    rendererOptions: {} = {},
+    rendererOptions: unknown = {},
   ) {
     this.width = width;
     this.height = height;

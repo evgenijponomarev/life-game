@@ -12,5 +12,5 @@ export interface IRenderer {
 }
 
 export interface IRendererConstructor {
-  new(targetElement: HTMLElement, width: number, height: number, options?: {}): IRenderer;
+  new(targetElement: HTMLElement, width: number, height: number, options?: unknown): IRenderer;
 }

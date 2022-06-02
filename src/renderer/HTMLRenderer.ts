@@ -90,4 +90,4 @@ export class HTMLRenderer implements IRenderer {
       this.killCell(Number(row), Number(column));
     });
   }
-};
+}
