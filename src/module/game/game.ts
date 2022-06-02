@@ -3,7 +3,7 @@ import { IRenderer, IRendererConstructor } from '../html-renderer';
 export enum GameState {
   inited = 'inited',
   started = 'started',
-  paused = 'paused',
+  stopped = 'stopped',
 }
 
 export type StateChangeHandler = (state: GameState) => void;
@@ -140,7 +140,7 @@ export class Game {
     const newGenerationCode = this.getGenerationCode(newGeneration);
 
     if (this.isRepeatedGeneration(newGenerationCode)) {
-      this.pause();
+      this.stop();
       return;
     }
 
@@ -149,7 +149,7 @@ export class Game {
     const changedCells = this.getGenerationDiff(newGeneration);
 
     if (changedCells.length === 0) {
-      this.pause();
+      this.stop();
       return;
     }
 
@@ -162,14 +162,15 @@ export class Game {
     this.interval = setInterval(this.makeNextGeneration, this.intervalTime);
   }
 
-  pause = () => {
-    this.setState(GameState.paused);
+  stop = () => {
+    this.setState(GameState.stopped);
     clearInterval(this.interval);
   }
 
   reset = () => {
     if (this.state === GameState.started) return;
     this.resetCurrentGeneration();
+    this.history = [];
     this.renderer.reset();
     this.setState(GameState.inited);
   }
