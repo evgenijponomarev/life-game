@@ -18,6 +18,7 @@ export class Game {
   state: GameState;
   currentGeneration: Generation;
   interval: NodeJS.Timer;
+  history: Array<string> = [];
   onStateChange: StateChangeHandler
 
   constructor(
@@ -114,7 +115,7 @@ export class Game {
     ], []),
   ], []);
 
-  makeNextGeneration = () => {
+  getNextGeneration = () => {
     const newGeneration = [...this.currentGeneration.map(row => [...row])];
 
     for (let rowIndex = 0; rowIndex < this.height; rowIndex += 1) {
@@ -123,9 +124,34 @@ export class Game {
       }
     }
 
+    return newGeneration;
+  }
+
+  getGenerationCode = (generation: Generation) => {
+    return generation.map(row => row.map(v => Number(v)).join('')).join('');
+  }
+
+  isRepeatedGeneration = (generationCode: string) => {
+    return this.history.includes(generationCode);
+  }
+
+  makeNextGeneration = () => {
+    const newGeneration = this.getNextGeneration();
+    const newGenerationCode = this.getGenerationCode(newGeneration);
+
+    if (this.isRepeatedGeneration(newGenerationCode)) {
+      this.pause();
+      return;
+    }
+
+    this.history.push(newGenerationCode);
+
     const changedCells = this.getGenerationDiff(newGeneration);
 
-    if (changedCells.length === 0) this.pause();
+    if (changedCells.length === 0) {
+      this.pause();
+      return;
+    }
 
     changedCells.forEach(cell => this.toggleCell(...cell));
   }
