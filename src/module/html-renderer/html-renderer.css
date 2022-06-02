@@ -1,18 +1,11 @@
-.field-root {
-  width: 100vw;
-  height: calc(100vh - 50px);
-}
-
 .field {
-  width: 100%;
-  height: 100%;
-  display: flex;
+  margin-top: 10px;
+  display: inline-flex;
   flex-direction: column;
+  border: 1px solid #000;
 }
 
 .row {
-  width: 100%;
-  height: 100%;
   display: flex;
   flex-direction: row;
 }
@@ -22,7 +15,8 @@
 }
 
 .cell {
-  width: 100%;
+  width: 20px;
+  height: 20px;
 }
 
 .cell + .cell {
