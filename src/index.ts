@@ -1,5 +1,5 @@
 import { HTMLRenderer } from './renderer';
-import { Game } from './Game';
+import { Game, StateChangeHandler, GameState } from './Game';
 
 const ROOT_CONTAINER_ID = 'field-root';
 const BUTTON_PLAY_ID = 'button-play';
@@ -13,11 +13,34 @@ const buttonPlay = document.getElementById(BUTTON_PLAY_ID);
 const buttonPause = document.getElementById(BUTTON_PAUSE_ID);
 const buttonReset = document.getElementById(BUTTON_RESET_ID);
 
+const onStateChange: StateChangeHandler = (state) => {
+  switch(state) {
+    case GameState.inited:
+      buttonPlay.classList.remove('button_disabled');
+      buttonPause.classList.add('button_disabled');
+      buttonReset.classList.remove('button_disabled');
+      break;
+
+    case GameState.started:
+      buttonPlay.classList.add('button_disabled');
+      buttonPause.classList.remove('button_disabled');
+      buttonReset.classList.add('button_disabled');
+      break;
+
+    case GameState.paused:
+      buttonPlay.classList.remove('button_disabled');
+      buttonPause.classList.add('button_disabled');
+      buttonReset.classList.remove('button_disabled');
+      break;
+  }
+}
+
 const game = new Game(
   rootContainer,
   FIELD_WIDTH,
   FIELD_HEIGHT,
   HTMLRenderer,
+  onStateChange,
 );
 
 buttonPlay.addEventListener('click', game.start);

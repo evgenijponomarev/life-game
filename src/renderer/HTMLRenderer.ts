@@ -26,7 +26,7 @@ export class HTMLRenderer implements IRenderer {
     targetElement: HTMLElement,
     width: number,
     height: number,
-    options: { classNames: ClassNames },
+    options: { classNames: ClassNames } = { classNames: {} },
   ) {
     this.targetElement = targetElement;
     this.width = width;

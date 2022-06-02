@@ -1,10 +1,12 @@
 import { IRenderer, IRendererConstructor } from './renderer';
 
-enum GameState {
+export enum GameState {
   inited = 'inited',
   started = 'started',
   paused = 'paused',
 }
+
+export type StateChangeHandler = (state: GameState) => void;
 
 export class Game {
   width: number;
@@ -12,14 +14,15 @@ export class Game {
   renderer: IRenderer;
   state: GameState;
   fieldModel: Array<Array<boolean>>;
-
+  onStateChange: StateChangeHandler
 
   constructor(
     targetElement: HTMLElement,
     width: number,
     height: number,
     Renderer: IRendererConstructor,
-    rendererOptions: unknown = {},
+    onStateChange?: StateChangeHandler,
+    rendererOptions?: unknown,
   ) {
     this.width = width;
     this.height = height;
@@ -27,7 +30,13 @@ export class Game {
     this.renderer.renderField();
     this.renderer.setClickHandler(this.toggleCell);
     this.resetFieldModel();
-    this.state = GameState.inited;
+    this.onStateChange = onStateChange;
+    this.setState(GameState.inited);
+  }
+
+  setState(newState: GameState) {
+    this.state = newState;
+    this.onStateChange(newState);
   }
 
   resetFieldModel() {
@@ -48,17 +57,17 @@ export class Game {
   }
 
   start = () => {
-    this.state = GameState.started;
+    this.setState(GameState.started);
   }
 
   pause = () => {
-    this.state = GameState.paused;
+    this.setState(GameState.paused);
   }
 
   reset = () => {
     if (this.state === GameState.started) return;
     this.resetFieldModel();
     this.renderer.reset();
-    this.state = GameState.inited;
+    this.setState(GameState.inited);
   }
 }
