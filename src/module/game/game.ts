@@ -1,4 +1,4 @@
-import { IRenderer, IRendererConstructor } from './renderer';
+import { IRenderer, IRendererConstructor } from '../html-renderer';
 
 export enum GameState {
   inited = 'inited',

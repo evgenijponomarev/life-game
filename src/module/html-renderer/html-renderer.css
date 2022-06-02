@@ -1,0 +1,34 @@
+.field-root {
+  width: 100vw;
+  height: calc(100vh - 50px);
+}
+
+.field {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.row {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: row;
+}
+
+.row + .row {
+  border-top: 1px solid #000;
+}
+
+.cell {
+  width: 100%;
+}
+
+.cell + .cell {
+  border-left: 1px solid #000;
+}
+
+.cell_alive {
+  background-color: #000;
+}
