@@ -6,14 +6,11 @@
   border-radius: 4px;
   color: #fff;
   cursor: pointer;
+  background: #0b0;
 }
 
 .button + .button {
   margin-left: 10px;
-}
-
-.button_play {
-  background: #0b0;
 }
 
 .button_reset {

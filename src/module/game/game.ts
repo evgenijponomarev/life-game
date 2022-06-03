@@ -103,7 +103,7 @@ export class Game {
     const isLife = this.currentGeneration[rowIndex][columnIndex];
     const lifeNeighborsCount = this.getLifeNeighborsCount(rowIndex, columnIndex);
 
-    return !isLife && lifeNeighborsCount > 2 ||
+    return !isLife && lifeNeighborsCount === 3 ||
       isLife && lifeNeighborsCount > 1 && lifeNeighborsCount < 4;
   }
 
@@ -135,6 +135,18 @@ export class Game {
     return this.history.indexOf(generationCode);
   }
 
+  applyGeneration = (generation: Generation, checkState = false) => {
+    const changedCells = this.getGenerationDiff(generation);
+
+    if (checkState && changedCells.length === 0) {
+      alert('Stable state of generation');
+      this.stop();
+      return;
+    }
+
+    changedCells.forEach(cell => this.toggleCell(...cell));
+  }
+
   makeNextGeneration = () => {
     const newGeneration = this.getNextGeneration();
     const newGenerationCode = this.getGenerationCode(newGeneration);
@@ -148,32 +160,51 @@ export class Game {
 
     this.history.push(newGenerationCode);
 
-    const changedCells = this.getGenerationDiff(newGeneration);
-
-    if (changedCells.length === 0) {
-      alert('Stable state of generation');
-      this.stop();
-      return;
-    }
-
-    changedCells.forEach(cell => this.toggleCell(...cell));
+    this.applyGeneration(newGeneration, true);
   }
 
-  start = () => {
-    this.setState(GameState.started);
+  makeGenerationByCode = (generationCode: string) => {
+    return generationCode.split('').reduce((acc, value, index) => {
+      const newAcc = acc.slice(0);
+      if (index % this.width === 0) {
+        newAcc.push([]);
+      }
+      newAcc[newAcc.length - 1].push(Boolean(Number(value)));
+      return newAcc;
+    }, []);
+  }
 
+  pushToHistory = () => {
     const generationCode = this.getGenerationCode(this.currentGeneration);
 
     if (this.findGenerationIndex(generationCode) === -1) {
       this.history.push(generationCode);
     }
+  }
 
+  start = () => {
+    this.setState(GameState.started);
+    this.pushToHistory();
     this.interval = setInterval(this.makeNextGeneration, this.intervalTime);
   }
 
   stop = () => {
     this.setState(GameState.stopped);
     clearInterval(this.interval);
+  }
+
+  goBack = () => {
+    if (this.history.length < 2) return;
+
+    const prevGenerationCode = this.history.slice(-2)[0];
+    this.history = this.history.slice(0, -1);
+    const prevGeneration = this.makeGenerationByCode(prevGenerationCode);
+    this.applyGeneration(prevGeneration);
+  }
+
+  goNext = () => {
+    this.pushToHistory();
+    this.makeNextGeneration();
   }
 
   reset = () => {
