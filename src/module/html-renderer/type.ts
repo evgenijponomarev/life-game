@@ -7,7 +7,7 @@ export interface IRenderer {
   reviveCell: CellHandler
   killCell: CellHandler
   renderField: () => void;
-  setClickHandler(cb: CellHandler): void;
+  setToggleHandler(cb: CellHandler): void;
   reset: () => void;
 }
 

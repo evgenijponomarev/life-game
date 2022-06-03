@@ -35,23 +35,28 @@ export class Game {
     this.intervalTime = intervalTime;
     this.renderer = new Renderer(targetElement, width, height, rendererOptions);
     this.renderer.renderField();
-    this.renderer.setClickHandler(this.onClickCell);
+    this.renderer.setToggleHandler(this.onCellToggle);
     this.resetCurrentGeneration();
     this.onStateChange = onStateChange;
     this.setState(GameState.inited);
   }
 
-  setState(newState: GameState) {
+  setState = (newState: GameState) => {
     this.state = newState;
     console.log(`Game ${newState}`);
     this.onStateChange(newState);
   }
 
-  resetCurrentGeneration() {
+  setCurrentGeneration = (generation: Generation) => {
+    this.currentGeneration = generation;
+    this.saveCurrentGenerationToHistory();
+  }
+
+  resetCurrentGeneration = () => {
     this.currentGeneration = [...new Array(this.height)].map(() => [...new Array(this.width)].map(() => false));
   }
   
-  onClickCell = (rowIndex: number, columnIndex: number) => {
+  onCellToggle = (rowIndex: number, columnIndex: number) => {
     if (this.state === GameState.started) return;
 
     this.toggleCell(rowIndex, columnIndex);
@@ -135,32 +140,32 @@ export class Game {
     return this.history.indexOf(generationCode);
   }
 
-  applyGeneration = (generation: Generation, checkState = false) => {
+  applyGeneration = (generation: Generation) => {
     const changedCells = this.getGenerationDiff(generation);
+    changedCells.forEach(cell => this.toggleCell(...cell));
 
-    if (checkState && changedCells.length === 0) {
-      alert('Stable state of generation');
+    if (this.state !== GameState.started) return;
+
+    if (changedCells.length === 0) {
       this.stop();
+      alert('Stable state of generation');
       return;
     }
 
-    changedCells.forEach(cell => this.toggleCell(...cell));
+    const generationCode = this.getGenerationCode(this.currentGeneration);
+    const duplicatedGenerationIndex = this.findGenerationIndex(generationCode);
+
+    if (duplicatedGenerationIndex > -1) {
+      this.stop();
+      alert(`Repeatable period: ${this.history.length - duplicatedGenerationIndex} generations`);
+      return;
+    }
   }
 
-  makeNextGeneration = (checkState = false) => {
+  makeNextGeneration = () => {
     const newGeneration = this.getNextGeneration();
-    const newGenerationCode = this.getGenerationCode(newGeneration);
-    const generationIndex = this.findGenerationIndex(newGenerationCode);
-
-    if (checkState && generationIndex > -1) {
-      this.stop();
-      alert(`Repeatable period: ${this.history.length - generationIndex} generations`);
-      return;
-    }
-
-    this.history.push(newGenerationCode);
-
-    this.applyGeneration(newGeneration, true);
+    this.applyGeneration(newGeneration);
+    this.saveCurrentGenerationToHistory();
   }
 
   makeGenerationByCode = (generationCode: string) => {
@@ -174,18 +179,23 @@ export class Game {
     }, []);
   }
 
-  pushToHistory = () => {
-    const generationCode = this.getGenerationCode(this.currentGeneration);
+  saveCurrentGenerationToHistory = () => {
+    const currentGenerationCode = this.getGenerationCode(this.currentGeneration);
+    const lastGenerationCode = this.history[this.history.length - 1];
 
-    if (this.findGenerationIndex(generationCode) === -1) {
-      this.history.push(generationCode);
-    }
+    if (currentGenerationCode === lastGenerationCode) return;
+
+    this.history.push(currentGenerationCode);
   }
 
   start = () => {
+    this.saveCurrentGenerationToHistory();
     this.setState(GameState.started);
-    this.pushToHistory();
-    this.interval = setInterval(() => this.makeNextGeneration(true), this.intervalTime);
+    this.interval = setInterval(() => {
+      if (this.state !== GameState.started) return;
+
+      this.makeNextGeneration();
+    }, this.intervalTime);
   }
 
   stop = () => {
@@ -203,7 +213,7 @@ export class Game {
   }
 
   goNext = () => {
-    this.pushToHistory();
+    this.saveCurrentGenerationToHistory();
     this.makeNextGeneration();
   }
 

@@ -70,12 +70,12 @@ export class HTMLRenderer implements IRenderer {
     this.targetElement.appendChild(this.fieldElement);
   }
 
-  setClickHandler = (onClickCallback: CellHandler) => {
+  setToggleHandler = (onCellToggle: CellHandler) => {
     this.fieldElement.addEventListener('click', event => {
       const target = event.target as HTMLElement;
       if (!(target).classList.contains(this.classNames.cell)) return;
 
-      onClickCallback(Number(target.dataset.row), Number(target.dataset.column));
+      onCellToggle(Number(target.dataset.row), Number(target.dataset.column));
     });
   }
 
