@@ -131,16 +131,18 @@ export class Game {
     return generation.map(row => row.map(v => Number(v)).join('')).join('');
   }
 
-  isRepeatedGeneration = (generationCode: string) => {
-    return this.history.includes(generationCode);
+  findGenerationIndex = (generationCode: string) => {
+    return this.history.indexOf(generationCode);
   }
 
   makeNextGeneration = () => {
     const newGeneration = this.getNextGeneration();
     const newGenerationCode = this.getGenerationCode(newGeneration);
+    const generationIndex = this.findGenerationIndex(newGenerationCode);
 
-    if (this.isRepeatedGeneration(newGenerationCode)) {
+    if (generationIndex > -1) {
       this.stop();
+      alert(`Repeatable period: ${this.history.length - generationIndex} generations`);
       return;
     }
 
@@ -149,6 +151,7 @@ export class Game {
     const changedCells = this.getGenerationDiff(newGeneration);
 
     if (changedCells.length === 0) {
+      alert('Stable state of generation');
       this.stop();
       return;
     }
@@ -158,6 +161,12 @@ export class Game {
 
   start = () => {
     this.setState(GameState.started);
+
+    const generationCode = this.getGenerationCode(this.currentGeneration);
+
+    if (this.findGenerationIndex(generationCode) === -1) {
+      this.history.push(generationCode);
+    }
 
     this.interval = setInterval(this.makeNextGeneration, this.intervalTime);
   }
