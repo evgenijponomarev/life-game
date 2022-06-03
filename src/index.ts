@@ -1,6 +1,6 @@
-require('./style.css');
+import './style.css';
 
-import { HTMLRenderer } from './module/html-renderer';
+import { CanvasRenderer } from './module/renderer';
 import { onStateChange, initButtonHandlers } from './module/controls';
 import { Game } from './module/game';
 
@@ -16,7 +16,7 @@ const game = new Game(
   FIELD_WIDTH,
   FIELD_HEIGHT,
   INTERVAL_TIME,
-  HTMLRenderer,
+  CanvasRenderer,
   onStateChange,
 );
 
