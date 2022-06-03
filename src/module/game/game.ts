@@ -11,14 +11,14 @@ export type StateChangeHandler = (state: GameState) => void;
 type Generation = Array<Array<boolean>>;
 
 export class Game {
+  state: GameState = GameState.inited;
+  history: Array<string> = [];
   width: number;
   height: number;
   intervalTime: number;
   renderer: IRenderer;
-  state: GameState;
   currentGeneration: Generation;
   interval: NodeJS.Timer;
-  history: Array<string> = [];
   onStateChange: StateChangeHandler
 
   constructor(
@@ -38,13 +38,19 @@ export class Game {
     this.renderer.setToggleHandler(this.onCellToggle);
     this.resetCurrentGeneration();
     this.onStateChange = onStateChange;
-    this.setState(GameState.inited);
+  }
+  
+  setState = (newState: GameState) => {
+    if (this.onStateChange && newState !== this.state) {
+      this.onStateChange(newState);
+    }
+    this.state = newState;
+
+    console.log(`Game ${newState}`);
   }
 
-  setState = (newState: GameState) => {
-    this.state = newState;
-    console.log(`Game ${newState}`);
-    if (this.onStateChange) this.onStateChange(newState);
+  getGenerationCode = (generation: Generation) => {
+    return generation.map(row => row.map(v => Number(v)).join('')).join('');
   }
 
   setCurrentGeneration = (generation: Generation) => {
@@ -132,10 +138,6 @@ export class Game {
     return newGeneration;
   }
 
-  getGenerationCode = (generation: Generation) => {
-    return generation.map(row => row.map(v => Number(v)).join('')).join('');
-  }
-
   findGenerationIndex = (generationCode: string) => {
     return this.history.indexOf(generationCode);
   }
@@ -158,7 +160,6 @@ export class Game {
     if (duplicatedGenerationIndex > -1) {
       this.stop();
       alert(`Repeatable period: ${this.history.length - duplicatedGenerationIndex} generations`);
-      return;
     }
   }
 
@@ -168,7 +169,7 @@ export class Game {
     this.saveCurrentGenerationToHistory();
   }
 
-  makeGenerationByCode = (generationCode: string) => {
+  getGenerationByCode = (generationCode: string) => {
     return generationCode.split('').reduce((acc, value, index) => {
       const newAcc = acc.slice(0);
       if (index % this.width === 0) {
@@ -208,7 +209,7 @@ export class Game {
 
     const prevGenerationCode = this.history.slice(-2)[0];
     this.history = this.history.slice(0, -1);
-    const prevGeneration = this.makeGenerationByCode(prevGenerationCode);
+    const prevGeneration = this.getGenerationByCode(prevGenerationCode);
     this.applyGeneration(prevGeneration);
   }
 
