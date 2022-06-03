@@ -1,4 +1,4 @@
-import { CellHandler, IRenderer } from './type';
+import { CellHandler, IRenderer } from '../type';
 
 type ClassNames = {
   field?: string;

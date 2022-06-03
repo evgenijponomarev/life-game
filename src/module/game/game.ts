@@ -1,4 +1,4 @@
-import { IRenderer, IRendererConstructor } from '../html-renderer';
+import { IRenderer, IRendererConstructor } from '../renderer';
 
 export enum GameState {
   inited = 'inited',
@@ -150,7 +150,7 @@ export class Game {
 
     if (changedCells.length === 0) {
       this.stop();
-      alert('Stable state of generation');
+      alert(`Population became stable on the ${this.history.length}'th generation`);
       return;
     }
 
@@ -159,7 +159,7 @@ export class Game {
 
     if (duplicatedGenerationIndex > -1) {
       this.stop();
-      alert(`Repeatable period: ${this.history.length - duplicatedGenerationIndex} generations`);
+      alert(`On the ${duplicatedGenerationIndex + 1}'th generation started repeatable period with length ${this.history.length - duplicatedGenerationIndex}`);
     }
   }
 

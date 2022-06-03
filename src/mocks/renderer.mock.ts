@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-empty-function */
 
-import { IRenderer } from '../module/html-renderer/type';
+import { IRenderer } from '../module/renderer';
 
 export class RendererMock implements IRenderer {
   targetElement: HTMLElement;
