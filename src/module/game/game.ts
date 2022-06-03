@@ -147,12 +147,12 @@ export class Game {
     changedCells.forEach(cell => this.toggleCell(...cell));
   }
 
-  makeNextGeneration = () => {
+  makeNextGeneration = (checkState = false) => {
     const newGeneration = this.getNextGeneration();
     const newGenerationCode = this.getGenerationCode(newGeneration);
     const generationIndex = this.findGenerationIndex(newGenerationCode);
 
-    if (generationIndex > -1) {
+    if (checkState && generationIndex > -1) {
       this.stop();
       alert(`Repeatable period: ${this.history.length - generationIndex} generations`);
       return;
@@ -185,7 +185,7 @@ export class Game {
   start = () => {
     this.setState(GameState.started);
     this.pushToHistory();
-    this.interval = setInterval(this.makeNextGeneration, this.intervalTime);
+    this.interval = setInterval(() => this.makeNextGeneration(true), this.intervalTime);
   }
 
   stop = () => {
