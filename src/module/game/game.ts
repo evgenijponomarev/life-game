@@ -44,7 +44,7 @@ export class Game {
   setState = (newState: GameState) => {
     this.state = newState;
     console.log(`Game ${newState}`);
-    this.onStateChange(newState);
+    if (this.onStateChange) this.onStateChange(newState);
   }
 
   setCurrentGeneration = (generation: Generation) => {
