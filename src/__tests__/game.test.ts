@@ -126,16 +126,6 @@ describe('Game', () => {
     });
   });
 
-  describe('cellShouldLive', () => {
-    it('should correctly detect if cell should live', () => {
-      const targetElement = document.createElement('div');
-      const game = new Game(targetElement, 5, 5, 100, RendererMock);
-      game.currentGeneration = getGenerationStub('cross');
-      const shouldCellLive = game.cellShouldLive(2, 2);
-      expect(shouldCellLive).toBe(false);
-    });
-  });
-
   describe('getGenerationDiff', () => {
     it('should correctly return generations difference', () => {
       const targetElement = document.createElement('div');

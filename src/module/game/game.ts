@@ -15,7 +15,7 @@ export type StateChangeHandler = (state: GameState) => void;
 
 type Generation = Array<Array<boolean>>;
 
-type GenerationDiff = Array<[number, number]>;
+type CellList = Array<[number, number]>;
 
 export class Game {
   state: GameState = GameState.inited;
@@ -94,25 +94,17 @@ export class Game {
     const rowIndexes = [prevRowIndex, rowIndex, nextRowIndex];
     const columnIndexes = [prevColumnIndex, columnIndex, nextColumnIndex];
 
-    const neighbors: Array<boolean> = [];
+    const neighbors: Array<[number, number]> = [];
 
     rowIndexes.forEach(ri => {
       columnIndexes.forEach(ci => {
         if (ri === rowIndex && ci === columnIndex) return;
 
-        neighbors.push(this.currentGeneration[ri][ci]);
+        neighbors.push([ri, ci]);
       });
     });
 
     return neighbors;
-  }
-
-  cellShouldLive = (rowIndex: number, columnIndex: number) => {
-    const isLife = this.currentGeneration[rowIndex][columnIndex];
-    const lifeNeighborsCount = this.getCellNeigbors(rowIndex, columnIndex).filter(n => n).length;
-
-    return !isLife && lifeNeighborsCount === 3 ||
-      isLife && lifeNeighborsCount > 1 && lifeNeighborsCount < 4;
   }
 
   getGenerationDiff = (newGeneration: Generation): Array<[number, number]> => newGeneration.reduce((rowsAcc, row, rowIndex) => [
@@ -123,16 +115,47 @@ export class Game {
     ], []),
   ], []);
 
-  getDiffForNextGeneration = () => {
-    const diff: GenerationDiff = [];
+  getCurrentLiveCells = () => this.currentGeneration.reduce((rowAcc, row, rowIndex) => [
+    ...rowAcc,
+    ...row.reduce((columnAcc, isLive, columnIndex) => [
+      ...columnAcc,
+      ...(isLive ? [[rowIndex, columnIndex]] : []),
+    ],[]),
+  ], []);
 
-    for (let rowIndex = 0; rowIndex < this.height; rowIndex += 1) {
-      for (let columnIndex = 0; columnIndex < this.width; columnIndex += 1) {
-        if (this.cellShouldLive(rowIndex, columnIndex) !== this.currentGeneration[rowIndex][columnIndex]) {
-          diff.push([rowIndex, columnIndex]);
+  getDiffForNextGeneration = () => {
+    const diff: Array<[number, number]> = [];
+    const affectedDeadCells: Set<string>  = new Set();
+
+    const liveCells = this.getCurrentLiveCells();
+
+    liveCells.forEach(([rowIndex, columnIndex]) => {
+      const cellIsLive = this.currentGeneration[rowIndex][columnIndex];
+      const neighbors = this.getCellNeigbors(rowIndex, columnIndex);
+      let liveNeighborsCount = 0;
+
+      neighbors.forEach(([ri, ci]) => {
+        if (this.currentGeneration[ri][ci]) {
+          liveNeighborsCount += 1;
+        } else {
+          affectedDeadCells.add(`${ri},${ci}`);
         }
+      });
+
+      if (
+        cellIsLive && liveNeighborsCount !== 2 && liveNeighborsCount !== 3 ||
+        !cellIsLive && liveNeighborsCount === 3
+      ) {
+        diff.push([rowIndex, columnIndex]);
       }
-    }
+    });
+
+    [...affectedDeadCells].forEach(c => {
+      const [rowIndex, columnIndex] = c.split(',').map(Number);
+      const neighbors = this.getCellNeigbors(rowIndex, columnIndex);
+      const liveNeighbors = neighbors.filter(([ri, ci]) => this.currentGeneration[ri][ci]);
+      if (liveNeighbors.length === 3) diff.push([rowIndex, columnIndex]);
+    });
 
     return diff;
   }
@@ -144,7 +167,7 @@ export class Game {
     this.applyGenerationDiff(changedCells);
   }
 
-  applyGenerationDiff = (changedCells: GenerationDiff) => {
+  applyGenerationDiff = (changedCells: CellList) => {
     changedCells.forEach(cell => this.toggleCell(...cell));
 
     if (this.state !== GameState.started) return;
@@ -166,7 +189,7 @@ export class Game {
 
   makeNextGeneration = () => {
     const diff = this.getDiffForNextGeneration();
-    this.applyGenerationDiff(diff);
+    this.applyGenerationDiff(diff as Array<[number, number]>);
     this.saveCurrentGenerationToHistory();
   }
 
