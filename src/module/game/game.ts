@@ -15,6 +15,8 @@ export type StateChangeHandler = (state: GameState) => void;
 
 type Generation = Array<Array<boolean>>;
 
+type GenerationDiff = Array<[number, number]>;
+
 export class Game {
   state: GameState = GameState.inited;
   history: Array<string> = [];
@@ -56,11 +58,6 @@ export class Game {
 
   getGenerationCode = (generation: Generation) => {
     return generation.map(row => row.map(v => Number(v)).join('')).join('');
-  }
-
-  setCurrentGeneration = (generation: Generation) => {
-    this.currentGeneration = generation;
-    this.saveCurrentGenerationToHistory();
   }
 
   resetCurrentGeneration = () => {
@@ -110,14 +107,9 @@ export class Game {
     return neighbors;
   }
 
-  getLifeNeighborsCount = (rowIndex: number, columnIndex: number) => {
-    const neighbors = this.getCellNeigbors(rowIndex, columnIndex);
-    return neighbors.filter(n => n).length;
-  }
-
   cellShouldLive = (rowIndex: number, columnIndex: number) => {
     const isLife = this.currentGeneration[rowIndex][columnIndex];
-    const lifeNeighborsCount = this.getLifeNeighborsCount(rowIndex, columnIndex);
+    const lifeNeighborsCount = this.getCellNeigbors(rowIndex, columnIndex).filter(n => n).length;
 
     return !isLife && lifeNeighborsCount === 3 ||
       isLife && lifeNeighborsCount > 1 && lifeNeighborsCount < 4;
@@ -131,24 +123,28 @@ export class Game {
     ], []),
   ], []);
 
-  getNextGeneration = () => {
-    const newGeneration = [...this.currentGeneration.map(row => [...row])];
+  getDiffForNextGeneration = () => {
+    const diff: GenerationDiff = [];
 
     for (let rowIndex = 0; rowIndex < this.height; rowIndex += 1) {
       for (let columnIndex = 0; columnIndex < this.width; columnIndex += 1) {
-        newGeneration[rowIndex][columnIndex] = this.cellShouldLive(rowIndex, columnIndex);
+        if (this.cellShouldLive(rowIndex, columnIndex) !== this.currentGeneration[rowIndex][columnIndex]) {
+          diff.push([rowIndex, columnIndex]);
+        }
       }
     }
 
-    return newGeneration;
+    return diff;
   }
 
-  findGenerationIndex = (generationCode: string) => {
-    return this.history.indexOf(generationCode);
-  }
+  findGenerationIndex = (generationCode: string) => this.history.indexOf(generationCode);
 
   applyGeneration = (generation: Generation) => {
     const changedCells = this.getGenerationDiff(generation);
+    this.applyGenerationDiff(changedCells);
+  }
+
+  applyGenerationDiff = (changedCells: GenerationDiff) => {
     changedCells.forEach(cell => this.toggleCell(...cell));
 
     if (this.state !== GameState.started) return;
@@ -169,8 +165,8 @@ export class Game {
   }
 
   makeNextGeneration = () => {
-    const newGeneration = this.getNextGeneration();
-    this.applyGeneration(newGeneration);
+    const diff = this.getDiffForNextGeneration();
+    this.applyGenerationDiff(diff);
     this.saveCurrentGenerationToHistory();
   }
 

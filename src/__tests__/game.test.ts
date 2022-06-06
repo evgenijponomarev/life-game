@@ -75,9 +75,9 @@ describe('Game', () => {
     it("should save current generation if it's not match the last one", () => {
       const targetElement = document.createElement('div');
       const game = new Game(targetElement, 5, 5, 100, RendererMock);
-      game.setCurrentGeneration(getGenerationStub('cross'));
-      game.setCurrentGeneration(getGenerationStub('empty'));
-      game.setCurrentGeneration(getGenerationStub('cross'));
+      game.currentGeneration = getGenerationStub('cross');
+      game.currentGeneration = getGenerationStub('empty');
+      game.currentGeneration = getGenerationStub('cross');
       expect(game.history.length).toBe(3);
       expect(game.history[game.history.length - 1]).toBe('0000000100011100010000000');
     });
@@ -85,9 +85,9 @@ describe('Game', () => {
     it("should not save current generation if it's match the last one", () => {
       const targetElement = document.createElement('div');
       const game = new Game(targetElement, 5, 5, 100, RendererMock);
-      game.setCurrentGeneration(getGenerationStub('empty'));
-      game.setCurrentGeneration(getGenerationStub('cross'));
-      game.setCurrentGeneration(getGenerationStub('cross'));
+      game.currentGeneration = getGenerationStub('empty');
+      game.currentGeneration = getGenerationStub('cross');
+      game.currentGeneration = getGenerationStub('cross');
       expect(game.history.length).toBe(2);
       expect(game.history[game.history.length - 1]).toBe('0000000100011100010000000');
     });
@@ -97,9 +97,9 @@ describe('Game', () => {
     it('should set empty generation', () => {
       const targetElement = document.createElement('div');
       const game = new Game(targetElement, 5, 5, 100, RendererMock);
-      game.setCurrentGeneration(getGenerationStub('empty'));
-      game.setCurrentGeneration(getGenerationStub('cross'));
-      game.setCurrentGeneration(getGenerationStub('cross'));
+      game.currentGeneration = getGenerationStub('empty');
+      game.currentGeneration = getGenerationStub('cross');
+      game.currentGeneration = getGenerationStub('cross');
       game.resetCurrentGeneration();
       expect(game.currentGeneration).toEqual(getGenerationStub('empty'));
     });
@@ -120,19 +120,9 @@ describe('Game', () => {
     it('should correctly return cell neighbors', () => {
       const targetElement = document.createElement('div');
       const game = new Game(targetElement, 5, 5, 100, RendererMock);
-      game.setCurrentGeneration(getGenerationStub('cross'));
+      game.currentGeneration = getGenerationStub('cross');
       const neighbors = game.getCellNeigbors(2, 2);
       expect(neighbors).toEqual([false, true, false, true, true, false, true, false]);
-    });
-  });
-
-  describe('getLifeNeighborsCount', () => {
-    it('should correctly return count of life cell neighbors', () => {
-      const targetElement = document.createElement('div');
-      const game = new Game(targetElement, 5, 5, 100, RendererMock);
-      game.setCurrentGeneration(getGenerationStub('cross'));
-      const lifeNeighborsCount = game.getLifeNeighborsCount(2, 2);
-      expect(lifeNeighborsCount).toBe(4);
     });
   });
 
@@ -140,7 +130,7 @@ describe('Game', () => {
     it('should correctly detect if cell should live', () => {
       const targetElement = document.createElement('div');
       const game = new Game(targetElement, 5, 5, 100, RendererMock);
-      game.setCurrentGeneration(getGenerationStub('cross'));
+      game.currentGeneration = getGenerationStub('cross');
       const shouldCellLive = game.cellShouldLive(2, 2);
       expect(shouldCellLive).toBe(false);
     });
@@ -150,19 +140,19 @@ describe('Game', () => {
     it('should correctly return generations difference', () => {
       const targetElement = document.createElement('div');
       const game = new Game(targetElement, 5, 5, 100, RendererMock);
-      game.setCurrentGeneration(getGenerationStub('cross'));
+      game.currentGeneration = getGenerationStub('cross');
       const diff = game.getGenerationDiff(getGenerationStub('square'));
       expect(diff).toEqual([[1, 1], [1, 3], [2, 2], [3, 1], [3, 3]]);
     });
   });
 
-  describe('getNextGeneration', () => {
-    it('should correctly return next generation', () => {
+  describe('getDiffForNextGeneration', () => {
+    it('should correctly return diff for next generation', () => {
       const targetElement = document.createElement('div');
       const game = new Game(targetElement, 5, 5, 100, RendererMock);
-      game.setCurrentGeneration(getGenerationStub('cross'));
-      const nextGeneration = game.getNextGeneration();
-      expect(nextGeneration).toEqual(getGenerationStub('square'));
+      game.currentGeneration = getGenerationStub('cross');
+      const nextGeneration = game.getDiffForNextGeneration();
+      expect(nextGeneration).toEqual([[1, 1], [1, 3], [2, 2], [3, 1], [3, 3]]);
     });
   });
 
@@ -170,7 +160,7 @@ describe('Game', () => {
     it('should create, apply and save to history next generation', () => {
       const targetElement = document.createElement('div');
       const game = new Game(targetElement, 5, 5, 100, RendererMock);
-      game.setCurrentGeneration(getGenerationStub('cross'));
+      game.currentGeneration = getGenerationStub('cross');
       game.makeNextGeneration();
       expect(game.currentGeneration).toEqual(getGenerationStub('square'));
       expect(game.history.length).toBe(2);
@@ -190,7 +180,7 @@ describe('Game', () => {
     it('should correctly apply next generation', () => {
       const targetElement = document.createElement('div');
       const game = new Game(targetElement, 5, 5, 100, RendererMock);
-      game.setCurrentGeneration(getGenerationStub('cross'));
+      game.currentGeneration = getGenerationStub('cross');
       game.goNext();
       expect(game.currentGeneration).toEqual(getGenerationStub('square'));
     });
@@ -200,7 +190,7 @@ describe('Game', () => {
     it('should correctly apply previous generation', () => {
       const targetElement = document.createElement('div');
       const game = new Game(targetElement, 5, 5, 100, RendererMock);
-      game.setCurrentGeneration(getGenerationStub('cross'));
+      game.currentGeneration = getGenerationStub('cross');
       game.goNext();
       expect(game.currentGeneration).toEqual(getGenerationStub('square'));
       game.goBack();
