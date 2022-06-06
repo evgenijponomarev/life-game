@@ -1,9 +1,14 @@
 import { IRenderer, IRendererConstructor } from '../renderer';
+import { gliderGun } from './presets';
 
 export enum GameState {
   inited = 'inited',
   started = 'started',
   stopped = 'stopped',
+}
+
+export enum Preset {
+  gliderGun = 'gliderGun',
 }
 
 export type StateChangeHandler = (state: GameState) => void;
@@ -224,5 +229,17 @@ export class Game {
     this.history = [];
     this.renderer.reset();
     this.setState(GameState.inited);
+  }
+
+  applyPreset = (preset: Preset) => {
+    this.reset();
+
+    switch(preset) {
+      case Preset.gliderGun:
+        this.applyGeneration(gliderGun.map(r => r.map(c => Boolean(c))));
+        break;
+
+      default:
+    }
   }
 }

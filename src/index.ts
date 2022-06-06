@@ -20,4 +20,4 @@ const game = new Game(
   onStateChange,
 );
 
-initButtonHandlers(game.start, game.stop, game.goBack, game.goNext, game.reset);
+initButtonHandlers(game.start, game.stop, game.goBack, game.goNext, game.reset, game.applyPreset);
